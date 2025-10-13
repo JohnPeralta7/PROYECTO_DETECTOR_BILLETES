@@ -1,0 +1,419 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+    background: white;
+    color: #333;
+}
+
+.container {
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+/* Header Section */
+.header {
+    background: white;
+    padding: 60px 40px 40px;
+    text-align: center;
+}
+
+.header h1 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #000;
+    margin-bottom: 15px;
+    line-height: 1.3;
+}
+
+.subtitle {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 35px;
+}
+
+.button-group {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 12px 30px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 180px;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-dark {
+    background: #2d2d2d;
+    color: white;
+}
+
+.btn-light {
+    background: #f5f5f5;
+    color: #2d2d2d;
+    border: 1px solid #ddd;
+}
+
+/* Content Section */
+.content-section {
+    background: linear-gradient(135deg, #f5aed0 20%, #d4f4dd 50%, #8fd8d5 100%);
+    padding: 60px 40px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+    border-radius: 20px;
+    margin: 0 20px 20px;
+    min-height: 400px;
+    
+}
+
+/* Steps Container - CORREGIDO */
+.steps-container {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    justify-content: center;
+}
+
+.step-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: relative;
+    left: 220px;
+    /*background: rgba(255, 255, 255, 0.8);
+    padding: 15px 20px;*/
+    transform: scale(1.5);
+    
+}
+
+.step-icon {
+    font-size: 2.5rem;
+    min-width: 60px;
+    text-align: center;
+}
+
+.step-text {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+    top: 12px;
+}
+
+.step-number {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #000;
+}
+
+.step-description {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #000;
+}
+
+/* Phone Container */
+.phone-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.phone-mockup {
+    width: 300px;
+    height: 600px;
+    background: #000;
+    border-radius: 45px;
+    padding: 15px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    position: relative;
+}
+
+.phone-notch {
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 140px;
+    height: 25px;
+    background: #000;
+    border-radius: 0 0 20px 20px;
+    z-index: 10;
+}
+
+.phone-screen {
+    background: white;
+    height: 100%;
+    border-radius: 35px;
+    overflow: hidden;
+    padding: 35px 20px 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.screen-header {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #666;
+    text-align: center;
+    margin-bottom: 20px;
+    letter-spacing: 0.5px;
+}
+
+.bill-preview {
+    background: white;
+    border: 2px dashed #ccc;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bill-preview img {
+    width: 100%;
+    max-width: 220px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.result-info {
+    background: #f8f8f8;
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+}
+
+.result-title {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #666;
+    margin-bottom: 5px;
+    letter-spacing: 0.5px;
+}
+
+.result-status {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #2d2d2d;
+}
+
+/* Responsive Design */
+
+/* Tablets */
+@media (max-width: 968px) {
+    .content-section {
+        grid-template-columns: 1fr;
+        gap: 40px;
+        padding: 50px 30px;
+        margin: 0 10px 20px;
+    }
+
+    .steps-container {
+        order: 2;
+    }
+
+    .phone-container {
+        order: 1;
+    }
+}
+
+/* Tablets pequeñas */
+@media (max-width: 768px) {
+    .header {
+        padding: 40px 25px 30px;
+    }
+
+    .header h1 {
+        font-size: 1.8rem;
+    }
+
+    .subtitle {
+        font-size: 0.95rem;
+    }
+
+    .button-group {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .btn {
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .content-section {
+        padding: 40px 25px;
+    }
+
+    .phone-mockup {
+        width: 280px;
+        height: 560px;
+    }
+
+    .step-icon {
+        font-size: 2rem;
+        min-width: 50px;
+    }
+
+    .step-number,
+    .step-description {
+        font-size: 1rem;
+    }
+}
+
+/* Móviles */
+@media (max-width: 480px) {
+    .header {
+        padding: 30px 20px 25px;
+    }
+
+    .header h1 {
+        font-size: 1.5rem;
+    }
+
+    .subtitle {
+        font-size: 0.9rem;
+        margin-bottom: 25px;
+    }
+
+    .button-group {
+        gap: 12px;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+        min-width: 160px;
+    }
+
+    .content-section {
+        padding: 30px 15px;
+        gap: 30px;
+        margin: 0 5px 20px;
+    }
+
+    .steps-container {
+        gap: 20px;
+    }
+
+    .step-icon {
+        font-size: 1.8rem;
+        min-width: 45px;
+    }
+
+    .step-number,
+    .step-description {
+        font-size: 0.95rem;
+    }
+
+    .phone-mockup {
+        width: 250px;
+        height: 500px;
+        padding: 12px;
+    }
+
+    .phone-screen {
+        padding: 30px 15px 15px;
+    }
+
+    .screen-header {
+        font-size: 0.7rem;
+        margin-bottom: 15px;
+    }
+
+    .bill-preview {
+        padding: 15px;
+    }
+
+    .result-info {
+        padding: 12px;
+    }
+
+    .result-status {
+        font-size: 0.85rem;
+    }
+}
+
+/* Móviles muy pequeños */
+@media (max-width: 360px) {
+    .header h1 {
+        font-size: 1.3rem;
+    }
+
+    .phone-mockup {
+        width: 220px;
+        height: 440px;
+    }
+
+    .step-icon {
+        font-size: 1.5rem;
+        min-width: 40px;
+    }
+
+    .step-number,
+    .step-description {
+        font-size: 0.9rem;
+    }
+}
+
+/* Pantallas grandes */
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .header {
+        padding: 80px 60px 50px;
+    }
+
+    .header h1 {
+        font-size: 2.5rem;
+    }
+
+    .subtitle {
+        font-size: 1.1rem;
+    }
+
+    .content-section {
+        padding: 80px 60px;
+        gap: 80px;
+        margin: 0 40px 20px;
+    }
+
+    .phone-mockup {
+        width: 320px;
+        height: 640px;
+    }
+
+    .step-icon {
+        font-size: 3rem;
+    }
+
+    .step-number,
+    .step-description {
+        font-size: 1.2rem;
+    }
+}

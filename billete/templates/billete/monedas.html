@@ -1,0 +1,52 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detector de Monedas</title>
+    <link rel="stylesheet" href="{% static 'billete/css/billetes.css' %}">
+</head>
+<body>
+    <h1>¡Detector de monedas no locales! 🪙</h1>
+    <div class="container">
+        
+        <div class="header">
+            <p class="instruction">Acerca tus monedas a la cámara</p>
+        </div>
+
+        <div class="main-content">
+            <div class="camera-section">
+                <div class="camera-placeholder">
+                    <svg class="camera-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                        <circle cx="12" cy="13" r="4"/>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="bottom-section">
+                <div class="buttons">
+                    <button class="btn btn-scan">
+                        <span class="btn-icon">🪙</span>
+                        Escanea tus<br>monedas
+                    </button>
+                    <button class="btn btn-reset">
+                        <span class="btn-icon">🔄</span>
+                        Reiniciar
+                    </button>
+                </div>
+
+                <div class="result-box">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="m21 21-4.35-4.35"/>
+                    </svg>
+                    <span class="result-text">Identificando...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
