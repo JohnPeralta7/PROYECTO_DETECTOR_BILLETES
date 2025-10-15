@@ -40,6 +40,7 @@
                         <path d="m21 21-4.35-4.35"/>
                     </svg>
                     <span class="result-text">Identificando...</span>
+                    <img id="img-resultado" style="max-width:320px;display:none;">
                 </div>
             </div>
         </div>
@@ -76,8 +77,12 @@
             })
             .then(response => response.json())
             .then(data => {
-                // Muestra el resultado en la interfaz
                 document.querySelector('.result-text').textContent = data.resultado || 'Procesado';
+                if (data.img_url) {
+                    const img = document.getElementById('img-resultado');
+                    img.src = data.img_url;
+                    img.style.display = 'block';
+                }
             });
         });
     </script>
