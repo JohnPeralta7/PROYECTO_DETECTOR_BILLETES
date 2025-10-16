@@ -31,10 +31,11 @@ def procesar_imagen(request):
         if not os.path.exists(static_img_dir):
             os.makedirs(static_img_dir)
         img_path = os.path.join(static_img_dir, 'img.jpeg')
+        output_path = os.path.join(static_img_dir, 'output.jpg')
         cv2.imwrite(img_path, img)
         
         think = Tools()
-        think.scan_billete(img_path)
+        think.scan_billete(img_path, output_path)
         
         img_url = "static/img/output.jpg"
         
