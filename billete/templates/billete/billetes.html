@@ -18,7 +18,8 @@
         <div class="main-content">
             <div class="camera-section">
                 <div class="camera-placeholder">
-                    <video id="video" width="320" height="240" autoplay></video>
+                    <video id="video" width="320" height="240" autoplay style="width: 100%; height: auto; border-radius: 8px;"></video>
+                    <img id="img-resultado" style="width: 100%; height: auto; display: none; border-radius: 8px;">
                 </div>
             </div>
 
@@ -40,51 +41,10 @@
                         <path d="m21 21-4.35-4.35"/>
                     </svg>
                     <span class="result-text">Identificando...</span>
-                    <img id="img-resultado" style="max-width:320px;display:none;">
                 </div>
             </div>
         </div>
     </div>
-    <script>
-        navigator.mediaDevices.getUserMedia({ video: true })
-        .then(stream => {
-            document.getElementById('video').srcObject = stream;
-        })
-        .catch(err => {
-            console.error("No se pudo acceder a la cámara:", err);
-        });
-
-        // Captura y envía el frame al backend
-        document.querySelector('.btn-scan').addEventListener('click', function() {
-            const video = document.getElementById('video');
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-            // Obtén la imagen en base64
-            const dataURL = canvas.toDataURL('image/jpeg');
-
-            // Envía la imagen al backend
-            fetch('/procesar-imagen/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: JSON.stringify({ image: dataURL })
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.querySelector('.result-text').textContent = data.resultado || 'Procesado';
-                if (data.img_url) {
-                    const img = document.getElementById('img-resultado');
-                    img.src = data.img_url;
-                    img.style.display = 'block';
-                }
-            });
-        });
-    </script>
+      <script src="{% static 'js/billete.js' %}"></script>
 </body>
 </html>
