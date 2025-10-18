@@ -1,8 +1,10 @@
 from ultralytics import YOLO
-
+import os
+from django.conf import settings
 
 class Tools:
-    def __init__(self, model_path =  r"C:\Users\osa_p\OneDrive\Escritorio\PROYECTO_DETECTOR_BILLETES\billete\dataset\best.pt"):
+    model_path = os.path.join(settings.BASE_DIR, 'billete', 'dataset', 'best.pt')
+    def __init__(self, model_path=model_path):
         self.model = YOLO(model_path)
 
     def scan_billete(self, img_path, output_path):
