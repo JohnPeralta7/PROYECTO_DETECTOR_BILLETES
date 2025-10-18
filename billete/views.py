@@ -35,7 +35,7 @@ def procesar_imagen(request):
         cv2.imwrite(img_path, img)
         
         think = Tools()
-        think.scan_billete(img_path, output_path)
+        think.scan(img_path, output_path)
         
         img_url = "static/img/output.jpg"
         
@@ -48,6 +48,7 @@ def procesar_imagen(request):
 def detectar_billetes(request):
     """Vista para detectar billetes"""
     return render(request, 'billete/billetes.html')
+
 
 def detectar_monedas(request):
     """Vista para detectar monedas"""
