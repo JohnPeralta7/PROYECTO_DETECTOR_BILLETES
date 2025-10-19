@@ -15,8 +15,9 @@
             <p class="subtitle">Usa la cámara para escanear. Obtén un análisis rápido y sencillo.</p>
             
             <div class="button-group">
-                <button class="btn btn-dark" id="scanBillBtn">Escanear billetes</button>
-                <button class="btn btn-light" id="scanCoinBtn">Escanear monedas</button>
+                <button class="btn btn-dark" id="scanBillBtn" data-url="{% url 'billete:billetes' %}">Escanear billetes</button>
+                <button class="btn btn-light" id="scanCoinBtn" data-url="{% url 'billete:monedas' %}">Escanear monedas</button>
+                <button class="btn btn-light" id="scanStateBtn" data-url="{% url 'billete:estado' %}">Escanear estado</button>
             </div>
         </header>
 
@@ -63,20 +64,7 @@
                     </div>
                 </div>
             </div>
-        </section>
-
-        <!-- Hidden camera input -->
-        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;">
-    </div>
-
-    <script>
-        document.getElementById('scanBillBtn').addEventListener('click', function() {
-            window.location.href = "{% url 'billete:billetes' %}";
-        });
-
-        document.getElementById('scanCoinBtn').addEventListener('click', function() {
-            window.location.href = "{% url 'billete:monedas' %}";
-        });
-    </script>
+        </section>  
+    <script src="{% static 'billete/js/Url.js' %}"></script>
 </body>
 </html>
