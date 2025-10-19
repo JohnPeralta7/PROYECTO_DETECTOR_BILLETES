@@ -398,3 +398,25 @@
                 padding: 14px 20px;
             }
         }
+
+
+
+
+
+/* Asegurar que el overlay ocupe toda la pantalla */
+.overlay {
+    z-index: 998;
+}
+
+.sidebar {
+    z-index: 999;
+}
+
+.menu-toggle {
+    z-index: 1000;
+}
+
+/* Prevenir scroll cuando el menú está abierto */
+body.menu-open {
+    overflow: hidden;
+}

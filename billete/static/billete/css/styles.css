@@ -93,24 +93,26 @@ body {
 
 .step-item {
     display: flex;
-    align-items: flex-start;
-    gap: 15px;
+    align-items: center;
+    gap: 20px;
     position: relative;
+    left: 220px;
+    transform: scale(1.5);
 }
 
 .step-icon {
     font-size: 2.5rem;
     min-width: 60px;
     text-align: center;
-    flex-shrink: 0;
 }
 
 .step-text {
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
+    gap: 10px;
+    position: relative;
+    top: 12px;
 }
 
 .step-number {
@@ -273,7 +275,9 @@ body {
     }
     
     .step-item {
-        justify-content: flex-start;
+        left: 0;
+        transform: scale(1.2);
+        justify-content: center;
     }
 }
 
@@ -321,11 +325,12 @@ body {
     }
     
     .step-item {
-        justify-content: flex-start;
+        left: 0;
+        transform: scale(1.1);
     }
 }
 
-/* Móviles */
+/* Móviles - Ocultar phone-container */
 @media (max-width: 480px) {
     .header {
         padding: 30px 20px 25px;
@@ -357,56 +362,44 @@ body {
 
     .content-section {
         grid-template-columns: 1fr;
-        padding: 30px 20px;
-        gap: 20px;
+        padding: 40px 20px;
+        gap: 0;
         margin: 20px 15px;
         border-radius: 30px;
-        min-height: auto;
     }
     
-    /* Ocultar el phone-container en móviles */
+    /* OCULTAR el phone-container en móviles */
     .phone-container {
         display: none !important;
     }
 
     .steps-container {
-        gap: 25px;
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-        padding: 0;
+        gap: 35px;
+        align-items: flex-start;
+        text-align: left;
+        order: 1;
     }
 
     .step-item {
-        display: flex;
-        align-items: flex-start;
-        gap: 15px;
-        width: 100%;
+        left: 0;
+        transform: scale(1);
+        justify-content: flex-start;
+        padding-left: 10px;
     }
 
     .step-icon {
-        font-size: 2.5rem;
+        font-size: 2.2rem;
         min-width: 50px;
-        flex-shrink: 0;
-        text-align: center;
     }
 
     .step-text {
-        display: flex;
-        flex-direction: column;
-        gap: 0;
-        align-items: flex-start;
+        top: 0;
     }
 
-    .step-number {
-        font-size: 1rem;
-        font-weight: 700;
-    }
-
+    .step-number,
     .step-description {
-        font-size: 0.95rem;
+        font-size: 1rem;
         font-weight: 600;
-        color: #000;
     }
 }
 
@@ -417,18 +410,12 @@ body {
     }
 
     .step-icon {
-        font-size: 1.8rem;
-        min-width: 35px;
+        font-size: 1.5rem;
+        min-width: 40px;
     }
 
     .step-number,
     .step-description {
-        font-size: 0.85rem;
-    }
-
-    .content-section {
-        padding: 25px 15px;
-        margin: 15px 10px;
+        font-size: 0.9rem;
     }
 }
-
