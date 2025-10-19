@@ -52,6 +52,30 @@ function setupEventListeners() {
     if (btnReset) {
         btnReset.addEventListener('click', resetCamera);
     }
+
+    // Botón subir imagen
+    const btnUpload = document.querySelector('.btn-upload');
+    if (btnUpload) {
+        btnUpload.addEventListener('click', function(e) {
+            e.preventDefault();
+            const fileInput = document.getElementById('file-input');
+            if (fileInput) {
+                fileInput.click();
+            } else {
+                console.error('No se encontró el input file');
+            }
+        });
+    } else {
+        console.error('No se encontró el botón btn-upload');
+    }
+
+    // Input file
+    const fileInput = document.getElementById('file-input');
+    if (fileInput) {
+        fileInput.addEventListener('change', handleFileUpload);
+    } else {
+        console.error('No se encontró el input file en setupEventListeners');
+    }
 }
 
 function scanBill() {
@@ -147,6 +171,103 @@ function scanBill() {
     });
 }
 
+function handleFileUpload(event) {
+    if (isProcessing) return;
+    
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validar que sea una imagen
+    if (!file.type.startsWith('image/')) {
+        const resultText = document.querySelector('.result-text');
+        if (resultText) {
+            resultText.textContent = 'Por favor selecciona una imagen válida';
+        }
+        return;
+    }
+
+    isProcessing = true;
+    const btnUpload = document.querySelector('.btn-upload');
+    if (btnUpload) btnUpload.disabled = true;
+
+    const resultText = document.querySelector('.result-text');
+    if (resultText) {
+        resultText.textContent = 'Procesando imagen...';
+    }
+
+    // Leer el archivo y convertir a base64
+    const reader = new FileReader();
+    
+    reader.onload = (e) => {
+        const dataURL = e.target.result;
+
+        // Obtener el token CSRF
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+
+        // Enviar la imagen al backend
+        fetch('/procesar-imagen/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({ image: dataURL })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const video = document.getElementById('video');
+            
+            // Ocultar el video
+            if (video) video.style.display = 'none';
+            
+            // Detener la cámara si está activa
+            stopCamera();
+
+            // Mostrar la imagen procesada
+            const img = document.getElementById('img-resultado');
+            if (img) {
+                const imgUrl = data.img_url.startsWith('/') ? data.img_url : '/' + data.img_url;
+                img.src = imgUrl + '?t=' + new Date().getTime();
+                img.style.display = 'block';
+            }
+
+            // Actualizar el texto del resultado
+            if (resultText) {
+                resultText.textContent = data.resultado || 'Procesado correctamente';
+            }
+            
+            // Habilitar botón de reinicio
+            const btnReset = document.querySelector('.btn-reset');
+            if (btnReset) btnReset.disabled = false;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            if (resultText) {
+                resultText.textContent = 'Error al procesar la imagen';
+            }
+            if (btnUpload) btnUpload.disabled = false;
+        })
+        .finally(() => {
+            isProcessing = false;
+        });
+    };
+
+    reader.onerror = () => {
+        if (resultText) {
+            resultText.textContent = 'Error al leer el archivo';
+        }
+        if (btnUpload) btnUpload.disabled = false;
+        isProcessing = false;
+    };
+
+    reader.readAsDataURL(file);
+}
+
 function stopCamera() {
     if (stream) {
         stream.getTracks().forEach(track => track.stop());
@@ -160,10 +281,16 @@ function resetCamera() {
     const resultText = document.querySelector('.result-text');
     const btnReset = document.querySelector('.btn-reset');
     const btnScan = document.querySelector('.btn-scan');
+    const btnUpload = document.querySelector('.btn-upload');
+    const fileInput = document.getElementById('file-input');
     
     // Deshabilitar botones mientras reinicia
     if (btnReset) btnReset.disabled = true;
     if (btnScan) btnScan.disabled = true;
+    if (btnUpload) btnUpload.disabled = true;
+    
+    // Limpiar input file
+    if (fileInput) fileInput.value = '';
     
     // Ocultar imagen y mostrar video
     if (img) img.style.display = 'none';
@@ -179,7 +306,7 @@ function resetCamera() {
         video: {
             width: { ideal: 1920 },
             height: { ideal: 1080 },
-            facingMode: 'environment' // Siempre cámara trasera
+            facingMode: 'environment'
         }
     };
 
@@ -192,6 +319,7 @@ function resetCamera() {
             // Habilitar botones cuando esté listo
             video.addEventListener('loadedmetadata', () => {
                 if (btnScan) btnScan.disabled = false;
+                if (btnUpload) btnUpload.disabled = false;
             }, { once: true });
         }
     })

@@ -55,4 +55,9 @@ def detectar_monedas(request):
     return render(request, 'billete/monedas.html')
 
 
+def estado(request):
+    """Vista para la página de estado (analizar el estado del billete/moneda)."""
+    return render(request, 'billete/estado.html')
+
+
 

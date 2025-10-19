@@ -19,5 +19,5 @@ from django.urls import path , include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('billete.urls')),  # ← Ruta principal de la app
+    path('', include(('billete.urls', 'billete'), namespace='billete')),  # ← Ruta principal de la app con namespace
 ]

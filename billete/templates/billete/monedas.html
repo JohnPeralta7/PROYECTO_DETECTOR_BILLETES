@@ -8,6 +8,42 @@
     <link rel="stylesheet" href="{% static 'billete/css/billetes.css' %}">
 </head>
 <body>
+   <!-- Botón para abrir/cerrar menú -->
+    <button class="menu-toggle" onclick="toggleMenu()" id="menuToggle">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+    <!-- Menú lateral -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header" onclick="closeMenu()">
+            <span class="sidebar-icon">🛡️</span>
+            <span class="sidebar-title">Billete Detector</span>
+        </div>
+
+        <nav class="nav-menu">
+            <a href="{% url 'billete:inicio' %}" class="nav-item">
+                <span class="nav-icon">🏠</span>
+                <span>Inicio</span>
+            </a>
+            <a href="{% url 'billete:billetes' %}" class="nav-item">
+                <span class="nav-icon">💵</span>
+                <span>Billetes</span>
+            </a>
+            <a href="{% url 'billete:monedas' %}" class="nav-item">
+                <span class="nav-icon">🪙</span>
+                <span>Monedas</span>
+            </a>
+            <a href="{% url 'billete:estado' %}" class="nav-item active">
+                <span class="nav-icon">📊</span>
+                <span>Estado</span>
+            </a>
+        </nav>
+    </aside>
     <h1>¡Detector de monedas no locales! 🪙</h1>
     <div class="container">
         
@@ -29,6 +65,10 @@
                         <span class="btn-icon">🪙</span>
                         Escanea tus<br>monedas
                     </button>
+                     <button class="btn btn-upload">
+                        <span class="btn-icon">📤</span>
+                        Subir<br>imagen
+                    </button>
                     <button class="btn btn-reset">
                         <span class="btn-icon">🔄</span>
                         Reiniciar
@@ -45,7 +85,9 @@
             </div>
         </div>
     </div>
-     <script src="{% static 'billete/js/billete.js' %}"></script>
+    <input type="file" id="file-input" accept="image/*" style="display: none;">
+     <script src="{% static 'billete/js/menu.js' %}"></script>
+    <script src="{% static 'billete/js/camara.js' %}"></script>
 </body>
 </html>
 
