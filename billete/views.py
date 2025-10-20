@@ -50,6 +50,38 @@ def detectar_billetes(request):
     return render(request, 'billete/billetes.html')
 
 
+@csrf_exempt
+def procesar_moneda(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        img_data = data['image'].split(',')[1]
+        img_bytes = base64.b64decode(img_data)
+        nparr = np.frombuffer(img_bytes, np.uint8)
+        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        
+        
+        
+        # Construir la ruta absoluta a static/img/
+        static_img_dir = os.path.join(settings.BASE_DIR, 'billete', 'static', 'img')
+        if not os.path.exists(static_img_dir):
+            os.makedirs(static_img_dir)
+        img_path = os.path.join(static_img_dir, 'img.jpeg')
+        output_path = os.path.join(static_img_dir, 'coin_result.jpg')
+        cv2.imwrite(img_path, img)
+        
+        think = Tools()
+        think.scan_coin(img_path, output_path)
+        
+        img_url = "static/img/coin_result.jpg"
+        
+        # Aquí puedes procesar la imagen con OpenCV
+        # Por ejemplo, solo devolvemos el tamaño de la imagen:
+        resultado = "Imagen procesada y señalada"
+        return JsonResponse({'resultado': resultado, 'img_url': img_url})
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+
+
 def detectar_monedas(request):
     """Vista para detectar monedas"""
     return render(request, 'billete/monedas.html')
