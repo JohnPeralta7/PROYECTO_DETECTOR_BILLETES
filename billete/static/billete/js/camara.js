@@ -1,6 +1,41 @@
 let stream = null;
 let isProcessing = false;
 
+// Detectar el tipo de detector según la URL actual
+function getDetectorType() {
+    const path = window.location.pathname;
+    if (path.includes('/billetes/')) {
+        return 'billetes';
+    } else if (path.includes('/monedas/')) {
+        return 'monedas';
+    } else if (path.includes('/estado/')) {
+        return 'estado';
+    }
+    return 'billetes'; // default
+}
+
+// Obtener el endpoint correcto según el tipo de detector
+function getProcessEndpoint() {
+    const type = getDetectorType();
+    const endpoints = {
+        'billetes': '/procesar-imagen/',
+        'monedas': '/procesar-moneda/',
+        'estado': '/procesar-estado/'
+    };
+    return endpoints[type];
+}
+
+// Obtener el mensaje de procesamiento según el tipo
+function getProcessingMessage() {
+    const type = getDetectorType();
+    const messages = {
+        'billetes': 'Procesando billete...',
+        'monedas': 'Procesando moneda...',
+        'estado': 'Analizando estado...'
+    };
+    return messages[type];
+}
+
 // Iniciar la cámara al cargar la página
 document.addEventListener('DOMContentLoaded', function() {
     initCamera();
@@ -65,16 +100,12 @@ function setupEventListeners() {
                 console.error('No se encontró el input file');
             }
         });
-    } else {
-        console.error('No se encontró el botón btn-upload');
     }
 
     // Input file
     const fileInput = document.getElementById('file-input');
     if (fileInput) {
         fileInput.addEventListener('change', handleFileUpload);
-    } else {
-        console.error('No se encontró el input file en setupEventListeners');
     }
 }
 
@@ -113,14 +144,17 @@ function scanBill() {
     // Actualizar texto mientras procesa
     const resultText = document.querySelector('.result-text');
     if (resultText) {
-        resultText.textContent = 'Procesando imagen...';
+        resultText.textContent = getProcessingMessage();
     }
 
     // Obtener el token CSRF
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
 
+    // Obtener el endpoint correcto según la página
+    const endpoint = getProcessEndpoint();
+
     // Enviar la imagen al backend
-    fetch('/procesar-imagen/', {
+    fetch(endpoint, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -144,7 +178,6 @@ function scanBill() {
         // Mostrar la imagen procesada
         const img = document.getElementById('img-resultado');
         if (img) {
-            // Manejar URL con o sin barra inicial
             const imgUrl = data.img_url.startsWith('/') ? data.img_url : '/' + data.img_url;
             img.src = imgUrl + '?t=' + new Date().getTime();
             img.style.display = 'block';
@@ -192,7 +225,7 @@ function handleFileUpload(event) {
 
     const resultText = document.querySelector('.result-text');
     if (resultText) {
-        resultText.textContent = 'Procesando imagen...';
+        resultText.textContent = getProcessingMessage();
     }
 
     // Leer el archivo y convertir a base64
@@ -204,8 +237,11 @@ function handleFileUpload(event) {
         // Obtener el token CSRF
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
 
+        // Obtener el endpoint correcto según la página
+        const endpoint = getProcessEndpoint();
+
         // Enviar la imagen al backend
-        fetch('/procesar-imagen/', {
+        fetch(endpoint, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -296,9 +332,15 @@ function resetCamera() {
     if (img) img.style.display = 'none';
     if (video) video.style.display = 'block';
     
-    // Resetear el texto
+    // Resetear el texto según el tipo de detector
     if (resultText) {
-        resultText.textContent = 'Identificando...';
+        const type = getDetectorType();
+        const messages = {
+            'billetes': 'Identificando...',
+            'monedas': 'Identificando...',
+            'estado': 'Analizando estado...'
+        };
+        resultText.textContent = messages[type];
     }
     
     // Reiniciar la cámara

@@ -85,9 +85,9 @@
             </div>
         </div>
     </div>
+    {% csrf_token %}
 
     <input type="file" id="file-input" accept="image/*" style="display: none;">
-    
     <script src="{% static 'billete/js/menu.js' %}"></script>
     <script src="{% static 'billete/js/camara.js' %}"></script>
 </body>
