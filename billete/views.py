@@ -56,6 +56,10 @@ def procesar_imagen(request):
 
 
 #----------------------------------------------------------------
+<<<<<<< HEAD
+=======
+#INCOMPLETO FALTA MEJORARLO
+>>>>>>> 99c14939 (implementacion del modelo de analisis de estado)
 @csrf_exempt
 def procesar_moneda(request):
     """Procesar monedas - detección y conteo"""
@@ -89,6 +93,8 @@ def procesar_moneda(request):
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 
+
+#ESTADO DEL BILLETE
 @csrf_exempt
 def procesar_estado(request):
     """Procesar estado del billete - análisis de deterioro"""
@@ -112,7 +118,7 @@ def procesar_estado(request):
             # Aquí puedes agregar tu lógica específica para analizar el estado
             # Por ahora usamos el mismo método scan como placeholder
             think = Tools()
-            think.scan(img_path, output_path)
+            think.scan_state(img_path, output_path)
             
             img_url = "static/img/estado_result.jpg"
             resultado = "✓ Estado del billete analizado"
