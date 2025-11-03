@@ -1,6 +1,22 @@
 let stream = null;
 let isProcessing = false;
 
+// Esperar a que las traducciones estén disponibles
+function waitForTranslations() {
+    return new Promise((resolve) => {
+        if (window.getTranslation) {
+            resolve();
+        } else {
+            const checkInterval = setInterval(() => {
+                if (window.getTranslation) {
+                    clearInterval(checkInterval);
+                    resolve();
+                }
+            }, 50);
+        }
+    });
+}
+
 // Detectar el tipo de detector según la URL actual
 function getDetectorType() {
     const path = window.location.pathname;
@@ -28,12 +44,21 @@ function getProcessEndpoint() {
 // Obtener el mensaje de procesamiento según el tipo
 function getProcessingMessage() {
     const type = getDetectorType();
-    const messages = {
-        'billetes': 'Procesando billete...',
-        'monedas': 'Procesando moneda...',
-        'estado': 'Analizando estado...'
+    const messageKeys = {
+        'billetes': 'processing_bill',
+        'monedas': 'processing_coin',
+        'estado': 'processing_state'
     };
-    return messages[type];
+    return window.getTranslation ? window.getTranslation(messageKeys[type]) : 'Procesando...';
+}
+
+// Obtener el mensaje de identificación según el tipo
+function getIdentifyingMessage() {
+    const type = getDetectorType();
+    if (type === 'estado') {
+        return window.getTranslation ? window.getTranslation('result_analyzing') : 'Analizando estado...';
+    }
+    return window.getTranslation ? window.getTranslation('result_identifying') : 'Identificando...';
 }
 
 // Iniciar la cámara al cargar la página
@@ -66,12 +91,51 @@ function initCamera() {
     })
     .catch(err => {
         console.error("No se pudo acceder a la cámara:", err);
+
+        // Mensaje donde saldra si no tiene permiso a la camara
+        let mensaje = '';
+        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+            const title = window.getTranslation ? window.getTranslation('camera_permission_denied_title') : '⚠️ PERMISO DE CÁMARA DENEGADO';
+            const message = window.getTranslation ? window.getTranslation('camera_permission_denied_message') : 
+                'Para usar el detector necesitas activar los permisos de cámara:\n\n' +
+                '1. Haz clic en el ícono de candado 🔒 en la barra de direcciones\n' +
+                '2. Busca "Cámara" y selecciona "Permitir"\n' +
+                '3. Recarga la página\n\n' +
+                'Alternativamente, puedes usar el botón "Subir imagen" 📤';
+            mensaje = title + '\n\n' + message;
+        } 
+        // si el dispositivo no tiene camara
+        else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+            const title = window.getTranslation ? window.getTranslation('camera_not_found_title') : '⚠️ NO SE ENCONTRÓ CÁMARA';
+            const message = window.getTranslation ? window.getTranslation('camera_not_found_message') :
+                'No se detectó ninguna cámara en tu dispositivo.\n' +
+                'Puedes usar el botón "Subir imagen" 📤 para cargar una foto.';
+            mensaje = title + '\n\n' + message;
+        }
+        // si hay error para acceder a la camara
+        else {
+            const title = window.getTranslation ? window.getTranslation('camera_error_title') : '⚠️ ERROR AL ACCEDER A LA CÁMARA';
+            const message = window.getTranslation ? window.getTranslation('camera_error_message') :
+                'No se pudo acceder a la cámara.\n' +
+                'Por favor, verifica los permisos e intenta nuevamente.\n\n' +
+                'Puedes usar el botón "Subir imagen" 📤 como alternativa.';
+            mensaje = title + '\n\n' + message;
+        }
+        
+        alert(mensaje);
+        
         const resultText = document.querySelector('.result-text');
         if (resultText) {
-            resultText.textContent = 'Error al acceder a la cámara';
+            resultText.textContent = window.getTranslation ? 
+                window.getTranslation('no_camera_access') : 
+                'Sin acceso a cámara - Usa "Subir imagen"';
         }
+        
         const btnScan = document.querySelector('.btn-scan');
-        if (btnScan) btnScan.disabled = true;
+        if (btnScan) {
+            btnScan.disabled = true;
+            btnScan.style.opacity = '0.5';
+        }
     });
 }
 
@@ -119,7 +183,9 @@ function scanBill() {
     if (!video || video.videoWidth === 0 || video.videoHeight === 0) {
         const resultText = document.querySelector('.result-text');
         if (resultText) {
-            resultText.textContent = 'Error: Video no está listo';
+            resultText.textContent = window.getTranslation ? 
+                window.getTranslation('error_video_not_ready') : 
+                'Error: Video no está listo';
         }
         return;
     }
@@ -185,7 +251,9 @@ function scanBill() {
 
         // Actualizar el texto del resultado
         if (resultText) {
-            resultText.textContent = data.resultado || 'Procesado correctamente';
+            resultText.textContent = data.resultado || (window.getTranslation ? 
+                window.getTranslation('processed_successfully') : 
+                'Procesado correctamente');
         }
         
         // Habilitar botón de reinicio
@@ -195,7 +263,9 @@ function scanBill() {
     .catch(error => {
         console.error('Error:', error);
         if (resultText) {
-            resultText.textContent = 'Error al procesar la imagen';
+            resultText.textContent = window.getTranslation ? 
+                window.getTranslation('error_processing_image') : 
+                'Error al procesar la imagen';
         }
         if (btnScan) btnScan.disabled = false;
     })
@@ -214,7 +284,9 @@ function handleFileUpload(event) {
     if (!file.type.startsWith('image/')) {
         const resultText = document.querySelector('.result-text');
         if (resultText) {
-            resultText.textContent = 'Por favor selecciona una imagen válida';
+            resultText.textContent = window.getTranslation ? 
+                window.getTranslation('error_invalid_image') : 
+                'Por favor selecciona una imagen válida';
         }
         return;
     }
@@ -274,7 +346,9 @@ function handleFileUpload(event) {
 
             // Actualizar el texto del resultado
             if (resultText) {
-                resultText.textContent = data.resultado || 'Procesado correctamente';
+                resultText.textContent = data.resultado || (window.getTranslation ? 
+                    window.getTranslation('processed_successfully') : 
+                    'Procesado correctamente');
             }
             
             // Habilitar botón de reinicio
@@ -284,7 +358,9 @@ function handleFileUpload(event) {
         .catch(error => {
             console.error('Error:', error);
             if (resultText) {
-                resultText.textContent = 'Error al procesar la imagen';
+                resultText.textContent = window.getTranslation ? 
+                    window.getTranslation('error_processing_image') : 
+                    'Error al procesar la imagen';
             }
             if (btnUpload) btnUpload.disabled = false;
         })
@@ -295,7 +371,9 @@ function handleFileUpload(event) {
 
     reader.onerror = () => {
         if (resultText) {
-            resultText.textContent = 'Error al leer el archivo';
+            resultText.textContent = window.getTranslation ? 
+                window.getTranslation('error_reading_file') : 
+                'Error al leer el archivo';
         }
         if (btnUpload) btnUpload.disabled = false;
         isProcessing = false;
@@ -334,13 +412,7 @@ function resetCamera() {
     
     // Resetear el texto según el tipo de detector
     if (resultText) {
-        const type = getDetectorType();
-        const messages = {
-            'billetes': 'Identificando...',
-            'monedas': 'Identificando...',
-            'estado': 'Analizando estado...'
-        };
-        resultText.textContent = messages[type];
+        resultText.textContent = getIdentifyingMessage();
     }
     
     // Reiniciar la cámara
@@ -368,7 +440,9 @@ function resetCamera() {
     .catch(err => {
         console.error("No se pudo acceder a la cámara:", err);
         if (resultText) {
-            resultText.textContent = 'Error al reiniciar la cámara';
+            resultText.textContent = window.getTranslation ? 
+                window.getTranslation('error_restart_camera') : 
+                'Error al reiniciar la cámara';
         }
     });
 }

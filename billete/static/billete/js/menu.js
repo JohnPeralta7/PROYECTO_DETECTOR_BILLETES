@@ -44,3 +44,14 @@ document.addEventListener('keydown', function(event) {
 document.querySelector('.sidebar').addEventListener('click', function(event) {
     event.stopPropagation();
 });
+
+
+
+
+
+
+
+
+
+
+
