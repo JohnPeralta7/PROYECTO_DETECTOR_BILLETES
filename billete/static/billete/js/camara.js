@@ -1,6 +1,66 @@
 let stream = null;
 let isProcessing = false;
 
+// Esperar a que las traducciones estén disponibles
+function waitForTranslations() {
+    return new Promise((resolve) => {
+        if (window.getTranslation) {
+            resolve();
+        } else {
+            const checkInterval = setInterval(() => {
+                if (window.getTranslation) {
+                    clearInterval(checkInterval);
+                    resolve();
+                }
+            }, 50);
+        }
+    });
+}
+
+// Detectar el tipo de detector según la URL actual
+function getDetectorType() {
+    const path = window.location.pathname;
+    if (path.includes('/billetes/')) {
+        return 'billetes';
+    } else if (path.includes('/monedas/')) {
+        return 'monedas';
+    } else if (path.includes('/estado/')) {
+        return 'estado';
+    }
+    return 'billetes'; // default
+}
+
+// Obtener el endpoint correcto según el tipo de detector
+function getProcessEndpoint() {
+    const type = getDetectorType();
+    const endpoints = {
+        'billetes': '/procesar-imagen/',
+        'monedas': '/procesar-moneda/',
+        'estado': '/procesar-estado/'
+    };
+    return endpoints[type];
+}
+
+// Obtener el mensaje de procesamiento según el tipo
+function getProcessingMessage() {
+    const type = getDetectorType();
+    const messageKeys = {
+        'billetes': 'processing_bill',
+        'monedas': 'processing_coin',
+        'estado': 'processing_state'
+    };
+    return window.getTranslation ? window.getTranslation(messageKeys[type]) : 'Procesando...';
+}
+
+// Obtener el mensaje de identificación según el tipo
+function getIdentifyingMessage() {
+    const type = getDetectorType();
+    if (type === 'estado') {
+        return window.getTranslation ? window.getTranslation('result_analyzing') : 'Analizando estado...';
+    }
+    return window.getTranslation ? window.getTranslation('result_identifying') : 'Identificando...';
+}
+
 // Iniciar la cámara al cargar la página
 document.addEventListener('DOMContentLoaded', function() {
     initCamera();
@@ -31,12 +91,51 @@ function initCamera() {
     })
     .catch(err => {
         console.error("No se pudo acceder a la cámara:", err);
+
+        // Mensaje donde saldra si no tiene permiso a la camara
+        let mensaje = '';
+        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+            const title = window.getTranslation ? window.getTranslation('camera_permission_denied_title') : '⚠️ PERMISO DE CÁMARA DENEGADO';
+            const message = window.getTranslation ? window.getTranslation('camera_permission_denied_message') : 
+                'Para usar el detector necesitas activar los permisos de cámara:\n\n' +
+                '1. Haz clic en el ícono de candado 🔒 en la barra de direcciones\n' +
+                '2. Busca "Cámara" y selecciona "Permitir"\n' +
+                '3. Recarga la página\n\n' +
+                'Alternativamente, puedes usar el botón "Subir imagen" 📤';
+            mensaje = title + '\n\n' + message;
+        } 
+        // si el dispositivo no tiene camara
+        else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+            const title = window.getTranslation ? window.getTranslation('camera_not_found_title') : '⚠️ NO SE ENCONTRÓ CÁMARA';
+            const message = window.getTranslation ? window.getTranslation('camera_not_found_message') :
+                'No se detectó ninguna cámara en tu dispositivo.\n' +
+                'Puedes usar el botón "Subir imagen" 📤 para cargar una foto.';
+            mensaje = title + '\n\n' + message;
+        }
+        // si hay error para acceder a la camara
+        else {
+            const title = window.getTranslation ? window.getTranslation('camera_error_title') : '⚠️ ERROR AL ACCEDER A LA CÁMARA';
+            const message = window.getTranslation ? window.getTranslation('camera_error_message') :
+                'No se pudo acceder a la cámara.\n' +
+                'Por favor, verifica los permisos e intenta nuevamente.\n\n' +
+                'Puedes usar el botón "Subir imagen" 📤 como alternativa.';
+            mensaje = title + '\n\n' + message;
+        }
+        
+        alert(mensaje);
+        
         const resultText = document.querySelector('.result-text');
         if (resultText) {
-            resultText.textContent = 'Error al acceder a la cámara';
+            resultText.textContent = window.getTranslation ? 
+                window.getTranslation('no_camera_access') : 
+                'Sin acceso a cámara - Usa "Subir imagen"';
         }
+        
         const btnScan = document.querySelector('.btn-scan');
-        if (btnScan) btnScan.disabled = true;
+        if (btnScan) {
+            btnScan.disabled = true;
+            btnScan.style.opacity = '0.5';
+        }
     });
 }
 
@@ -65,16 +164,12 @@ function setupEventListeners() {
                 console.error('No se encontró el input file');
             }
         });
-    } else {
-        console.error('No se encontró el botón btn-upload');
     }
 
     // Input file
     const fileInput = document.getElementById('file-input');
     if (fileInput) {
         fileInput.addEventListener('change', handleFileUpload);
-    } else {
-        console.error('No se encontró el input file en setupEventListeners');
     }
 }
 
@@ -88,7 +183,9 @@ function scanBill() {
     if (!video || video.videoWidth === 0 || video.videoHeight === 0) {
         const resultText = document.querySelector('.result-text');
         if (resultText) {
-            resultText.textContent = 'Error: Video no está listo';
+            resultText.textContent = window.getTranslation ? 
+                window.getTranslation('error_video_not_ready') : 
+                'Error: Video no está listo';
         }
         return;
     }
@@ -113,14 +210,17 @@ function scanBill() {
     // Actualizar texto mientras procesa
     const resultText = document.querySelector('.result-text');
     if (resultText) {
-        resultText.textContent = 'Procesando imagen...';
+        resultText.textContent = getProcessingMessage();
     }
 
     // Obtener el token CSRF
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
 
+    // Obtener el endpoint correcto según la página
+    const endpoint = getProcessEndpoint();
+
     // Enviar la imagen al backend
-    fetch('/procesar-imagen/', {
+    fetch(endpoint, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -144,7 +244,6 @@ function scanBill() {
         // Mostrar la imagen procesada
         const img = document.getElementById('img-resultado');
         if (img) {
-            // Manejar URL con o sin barra inicial
             const imgUrl = data.img_url.startsWith('/') ? data.img_url : '/' + data.img_url;
             img.src = imgUrl + '?t=' + new Date().getTime();
             img.style.display = 'block';
@@ -152,7 +251,9 @@ function scanBill() {
 
         // Actualizar el texto del resultado
         if (resultText) {
-            resultText.textContent = data.resultado || 'Procesado correctamente';
+            resultText.textContent = data.resultado || (window.getTranslation ? 
+                window.getTranslation('processed_successfully') : 
+                'Procesado correctamente');
         }
         
         // Habilitar botón de reinicio
@@ -162,7 +263,9 @@ function scanBill() {
     .catch(error => {
         console.error('Error:', error);
         if (resultText) {
-            resultText.textContent = 'Error al procesar la imagen';
+            resultText.textContent = window.getTranslation ? 
+                window.getTranslation('error_processing_image') : 
+                'Error al procesar la imagen';
         }
         if (btnScan) btnScan.disabled = false;
     })
@@ -181,7 +284,9 @@ function handleFileUpload(event) {
     if (!file.type.startsWith('image/')) {
         const resultText = document.querySelector('.result-text');
         if (resultText) {
-            resultText.textContent = 'Por favor selecciona una imagen válida';
+            resultText.textContent = window.getTranslation ? 
+                window.getTranslation('error_invalid_image') : 
+                'Por favor selecciona una imagen válida';
         }
         return;
     }
@@ -192,7 +297,7 @@ function handleFileUpload(event) {
 
     const resultText = document.querySelector('.result-text');
     if (resultText) {
-        resultText.textContent = 'Procesando imagen...';
+        resultText.textContent = getProcessingMessage();
     }
 
     // Leer el archivo y convertir a base64
@@ -204,8 +309,11 @@ function handleFileUpload(event) {
         // Obtener el token CSRF
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
 
+        // Obtener el endpoint correcto según la página
+        const endpoint = getProcessEndpoint();
+
         // Enviar la imagen al backend
-        fetch('/procesar-imagen/', {
+        fetch(endpoint, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -238,7 +346,9 @@ function handleFileUpload(event) {
 
             // Actualizar el texto del resultado
             if (resultText) {
-                resultText.textContent = data.resultado || 'Procesado correctamente';
+                resultText.textContent = data.resultado || (window.getTranslation ? 
+                    window.getTranslation('processed_successfully') : 
+                    'Procesado correctamente');
             }
             
             // Habilitar botón de reinicio
@@ -248,7 +358,9 @@ function handleFileUpload(event) {
         .catch(error => {
             console.error('Error:', error);
             if (resultText) {
-                resultText.textContent = 'Error al procesar la imagen';
+                resultText.textContent = window.getTranslation ? 
+                    window.getTranslation('error_processing_image') : 
+                    'Error al procesar la imagen';
             }
             if (btnUpload) btnUpload.disabled = false;
         })
@@ -259,7 +371,9 @@ function handleFileUpload(event) {
 
     reader.onerror = () => {
         if (resultText) {
-            resultText.textContent = 'Error al leer el archivo';
+            resultText.textContent = window.getTranslation ? 
+                window.getTranslation('error_reading_file') : 
+                'Error al leer el archivo';
         }
         if (btnUpload) btnUpload.disabled = false;
         isProcessing = false;
@@ -296,9 +410,9 @@ function resetCamera() {
     if (img) img.style.display = 'none';
     if (video) video.style.display = 'block';
     
-    // Resetear el texto
+    // Resetear el texto según el tipo de detector
     if (resultText) {
-        resultText.textContent = 'Identificando...';
+        resultText.textContent = getIdentifyingMessage();
     }
     
     // Reiniciar la cámara
@@ -326,7 +440,9 @@ function resetCamera() {
     .catch(err => {
         console.error("No se pudo acceder a la cámara:", err);
         if (resultText) {
-            resultText.textContent = 'Error al reiniciar la cámara';
+            resultText.textContent = window.getTranslation ? 
+                window.getTranslation('error_restart_camera') : 
+                'Error al reiniciar la cámara';
         }
     });
 }

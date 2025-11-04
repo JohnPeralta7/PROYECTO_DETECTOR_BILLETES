@@ -9,4 +9,7 @@ urlpatterns = [
     path('monedas/', views.detectar_monedas, name='monedas'),
     path('estado/', views.estado, name='estado'),
     path('procesar-imagen/', views.procesar_imagen, name='procesar_imagen'),
+    #
+    path('procesar-moneda/', views.procesar_moneda, name='procesar_moneda'),
+    path('procesar-estado/', views.procesar_estado, name='procesar_estado'),
 ]
