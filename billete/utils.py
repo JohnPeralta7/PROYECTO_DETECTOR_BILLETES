@@ -6,11 +6,12 @@ from django.conf import settings
 
 class Tools:
     model_path = os.path.join(settings.BASE_DIR, 'billete', 'dataset', 'best.pt')
-    model_path2 = os.path.join(settings.BASE_DIR, 'billete', 'dataset', 'best.pt')
+    model_path2 = os.path.join(settings.BASE_DIR, 'billete', 'dataset', 'moneda.pt')
     model_path3 = os.path.join(settings.BASE_DIR, 'billete', 'dataset', 'estado.pt')
-    def __init__(self, model_path=model_path, model_path3=model_path3):
+    def __init__(self, model_path=model_path, model_path3=model_path3, model_path2=model_path2):
         self.model = YOLO(model_path)
         self.model2 = YOLO(model_path3)
+        self.model3 = YOLO(model_path2)
 
 
     def scan(self, img_path, output_path):
