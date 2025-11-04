@@ -25,6 +25,13 @@ class Tools:
         result = self.model2(img_path)
         result[0].save(filename=output_path)  # Guarda la imagen con los boxes
         return result
+    
+    def scan_coin(self, img_path, output_path):
+        # Aquí podrías implementar un análisis específico para el estado del billete
+        result = self.model3(img_path)
+        result[0].save(filename=output_path)  # Guarda la imagen con los boxes
+        return result
+
 
 
 
