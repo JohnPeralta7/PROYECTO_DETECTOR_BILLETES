@@ -26,9 +26,39 @@ class Tools:
 
     # --- DETECCIÓN DE BILLETES ---
     def scan(self, img_path, output_path):
-        result = self.model(img_path)
+        transformation = self.equalization(img_path, output_path)
+        result = self.model(transformation)
         result[0].save(filename=output_path)
         return result
+    
+
+    # Aplicacion de adaptive equalization - ajuste
+    def equalization(self, img_path, output_path):
+    
+        # Cargar imagen en color (BGR)
+        img = cv2.imread(img_path)
+
+        # Convertir a espacio de color LAB
+        lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
+
+        # Separar canales
+        l, a, b = cv2.split(lab)
+
+        # Crear el objeto CLAHE (igual al adaptive equalization de Roboflow)
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+
+        # Aplicar sobre el canal L (luminancia)
+        cl = clahe.apply(l)
+
+        # Volver a combinar canales
+        merged = cv2.merge((cl, a, b))
+
+        # Convertir de nuevo a BGR
+        final_img = cv2.cvtColor(merged, cv2.COLOR_LAB2BGR)
+        #final_img.save(filename = output_path)
+
+        return final_img
+
 
     # --- ANÁLISIS DEL ESTADO DEL BILLETE ---
     def scan_state(self, img_path, output_path):

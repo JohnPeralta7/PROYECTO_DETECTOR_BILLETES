@@ -56,7 +56,7 @@ def procesar_imagen(request):
 
 
 #----------------------------------------------------------------
-#INCOMPLETO FALTA MEJORARLO
+#COMPLETO MONEDAS
 @csrf_exempt
 def procesar_moneda(request):
     """Procesar monedas - detección y conteo"""
