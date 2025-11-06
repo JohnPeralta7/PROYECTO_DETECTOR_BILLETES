@@ -1,5 +1,6 @@
 from ultralytics import YOLO
 import cv2
+import easyocr
 import numpy as np
 import os
 from django.conf import settings
@@ -78,6 +79,15 @@ class Tools:
 
                 print("si funciona papu")
 
+                #prueba pequena
+
+                imgray = cv2.cvtColor(esquina_izq, cv2.COLOR_BGR2GRAY)
+
+
+                # lectura con ocr 
+
+                self.read_img(img = imgray)
+
 
 
 
@@ -91,8 +101,23 @@ class Tools:
     
 
     # segunda validacion - aplicando ocr
-    def read_img(self):
-        ...
+    def read_img(self, img):
+        i = 0
+        codes = []
+        reader = easyocr.Reader(['en'])
+        resultados = reader.readtext(img)
+
+        for (_, text, conf) in resultados:
+            i += 1
+            print(f"Texto: {text}, Confianza: {conf:.2f}")
+            if i > 1 and i <= 4:
+                codes.append(text)
+            else:
+                print('nada interesante')
+
+
+        print(codes)
+        return codes
 
 
 
