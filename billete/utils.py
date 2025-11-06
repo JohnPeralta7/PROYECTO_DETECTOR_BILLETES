@@ -19,18 +19,87 @@ class Tools:
     model_path2 = os.path.join(settings.BASE_DIR, 'billete', 'dataset', 'moneda.pt')
     model_path3 = os.path.join(settings.BASE_DIR, 'billete', 'dataset', 'estado.pt')
 
+    static_img_dir = os.path.join(settings.BASE_DIR, 'billete', 'static', 'img')
+
     def __init__(self, model_path=model_path, model_path3=model_path3, model_path2=model_path2):
         self.model = YOLO(model_path)
         self.model2 = YOLO(model_path3)
         self.model3 = YOLO(model_path2)
 
     # --- DETECCIÓN DE BILLETES ---
-    def scan(self, img_path, output_path):
+    def scan(self, img_path, output_path, static_img_dir = static_img_dir):
         transformation = self.equalization(img_path, output_path)
         result = self.model(transformation)
         result[0].save(filename=output_path)
+
+        res = result[0]
+        img = cv2.imread(output_path)
+
+
+
+        for i, box in enumerate(res.boxes):
+            # Coordenadas del bounding box
+            x1, y1, x2, y2 = map(int, box.xyxy[0])
+
+            # Clase y confianza
+            cls = int(box.cls[0])
+            conf = float(box.conf[0])
+            label = self.model.names[cls]
+
+            print(f"Detección: {label} ({conf:.2f}) -> [{x1}, {y1}, {x2}, {y2}]")
+
+            # 🔹 Solo recortar si la clase es billete_frontal
+            if label == "billete_frontal":
+                recorte = img[y1:y2, x1:x2]
+                nombre_archivo = f"recorte_{label}_{i}.jpg"
+                cv2.imwrite(os.path.join(static_img_dir, nombre_archivo), recorte)
+                print(f" Recorte guardado: {nombre_archivo}")
+
+                #-----------------------------------
+
+                #teniendo la img cortada recientemente
+                imgcut = cv2.imread(os.path.join(static_img_dir, nombre_archivo))
+
+                #consiguiendo las dimensiones
+                h, w, _ = imgcut.shape
+
+                # zona de recorte con porcentajes
+                x_inicio = 0
+                x_fin = int(w * 0.45)      # 45% del ancho
+                y_inicio = 0
+                y_fin = int(h * 0.45)      # 45% de la altura
+
+                #este recorte se hara dentro del if, para validar que sea el frontal del $ donde esta el cod
+
+                esquina_izq = imgcut[y_inicio:y_fin, x_inicio:x_fin]
+
+
+                cv2.imwrite(os.path.join(static_img_dir, "recorte_final.jpg"), esquina_izq)
+
+                print("si funciona papu")
+
+
+
+
+
+
+            else:
+                print("Detección ignorada (no es billete_frontal)")
+
+
         return result
     
+
+    # segunda validacion - aplicando ocr
+    def read_img(self):
+        ...
+
+
+
+
+
+
+
 
     # Aplicacion de adaptive equalization - ajuste
     def equalization(self, img_path, output_path):
