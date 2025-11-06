@@ -27,6 +27,7 @@ class Tools:
         self.model = YOLO(model_path)
         self.model2 = YOLO(model_path3)
         self.model3 = YOLO(model_path2)
+        self.label = ''
 
     # --- DETECCIÓN DE BILLETES ---
     def scan(self, img_path, output_path, static_img_dir = static_img_dir):
@@ -47,6 +48,8 @@ class Tools:
             cls = int(box.cls[0])
             conf = float(box.conf[0])
             label = self.model.names[cls]
+
+            self.label = label
 
             print(f"Detección: {label} ({conf:.2f}) -> [{x1}, {y1}, {x2}, {y2}]")
 
@@ -177,8 +180,7 @@ class Tools:
 
 
 
-
-
+  
                  
 
 
@@ -207,6 +209,14 @@ class Tools:
         
         print(data, 'pilas mira esto para ver si funciona')
         return data
+
+
+
+    #limpieza para que no se buggee con las valids
+    def clean(self):
+        filename = os.path.join( settings.BASE_DIR, 'billete', 'static', 'codes.json')
+        with open(filename, 'w') as file:
+            json.dump([], file, indent = 4)# dump:graba datos a un archivo json
 
 
 

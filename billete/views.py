@@ -17,6 +17,21 @@ def inicio(request):
 
 @csrf_exempt
 def procesar_imagen(request):
+    mssj = [
+        "Textura analizada: Papel Moneda",
+        "Textura analizada: No es Papel Moneda",
+        "Cumple con codigo de coherencia",
+        "No cumple con codigo de coherencia",
+        "Esta dentro de la base de datos de la FED",
+        "NO esta dentro de la base de datos de la FED",
+        "Billete Verdadero",
+        "Billete Falso!"
+
+    ]
+
+    
+
+
     if request.method == 'POST':
         data = json.loads(request.body)
         img_data = data['image'].split(',')[1]
@@ -35,12 +50,38 @@ def procesar_imagen(request):
         cv2.imwrite(img_path, img)
         
         think = Tools()
+        think.clean()
         think.scan(img_path, output_path)
 
         codes = think.code_read()
         
-        first = codes[0][1]
-        print(first)
+        if len(codes) > 2:
+            first = codes[1][1]
+            second = codes[2][0]
+            print(first, second) #comprobar si todo bien
+        elif len(codes) < 2:
+            first = codes[0][1]
+            second = codes[1][0]
+            print(first, second) #comprobar si todo bien
+        else:
+            print('hola')
+
+
+        if (think.label == "billete_frontal") or (think.label == "billete_trasero"):
+
+            resultado1 = mssj[0]
+
+
+            if first == second:
+                resultado2 = mssj[2]
+                #ORM PARA VALIDAR
+                
+            else:
+                resultado2 = mssj[3]
+
+        else:
+
+            resultado = mssj[1]
 
 
 
@@ -50,7 +91,7 @@ def procesar_imagen(request):
         # Aquí puedes procesar la imagen con OpenCV
         # Por ejemplo, solo devolvemos el tamaño de la imagen:
         resultado = "Imagen procesada y señalada"
-        return JsonResponse({'resultado': resultado, 'img_url': img_url})
+        return JsonResponse({'resultado': [resultado,resultado1,  resultado2 ], 'img_url': img_url})
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 
