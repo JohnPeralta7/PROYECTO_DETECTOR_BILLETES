@@ -8,6 +8,7 @@ import cv2
 from billete.utils import Tools
 import os
 from django.conf import settings
+from .models import bancos
 
 # Create your views here.
 def inicio(request):
@@ -18,6 +19,7 @@ def inicio(request):
 @csrf_exempt
 def procesar_imagen(request):
     mssj = [
+        
         "Textura analizada: Papel Moneda",
         "Textura analizada: No es Papel Moneda",
         "Cumple con codigo de coherencia",
@@ -25,7 +27,9 @@ def procesar_imagen(request):
         "Esta dentro de la base de datos de la FED",
         "NO esta dentro de la base de datos de la FED",
         "Billete Verdadero",
-        "Billete Falso!"
+        "Billete Falso!",
+        "Tomar foto al billete donde se vean sus codigos para validarlo",
+        "Falta mas informacion para determinar",
 
     ]
 
@@ -53,37 +57,78 @@ def procesar_imagen(request):
         think.clean()
         think.scan(img_path, output_path)
 
-        codes = think.code_read()
         
-        if len(codes) > 2:
-            first = codes[1][1]
-            second = codes[2][0]
-            print(first, second) #comprobar si todo bien
-        elif len(codes) < 2:
-            first = codes[0][1]
-            second = codes[1][0]
-            print(first, second) #comprobar si todo bien
-        else:
-            print('hola')
 
 
-        if (think.label == "billete_frontal") or (think.label == "billete_trasero"):
+        if (think.label == "billete_frontal"):
 
             resultado1 = mssj[0]
+            codes = think.code_read()
+            first = ''
+            second = ''
+            valid = ''
+            if len(codes) > 2:
+                first = codes[1][1]
+                second = codes[2][0]
+                valid = codes[2]
+                print(first, second) #comprobar si todo bien
+            elif len(codes) <= 2:
+                first = codes[0][1]
+                second = codes[1][0]
+                valid = codes[1]
+                print(first, second) #comprobar si todo bien
+            else:
+                print('hola')
 
-
-            if first == second:
+            if first.upper() == second.upper():
                 resultado2 = mssj[2]
                 #ORM PARA VALIDAR
-                
-            else:
+                banks = bancos.objects.all().values()
+                print(banks)
+                valid = str(valid).strip()
+                print("💬 Valor de valid:", repr(valid))
+                print("📋 Tipo de valid:", type(valid))
+                print("📊 Valores en la base de datos:", list(bancos.objects.values_list('indicador', flat=True)))
+
+                consult_bd = list(bancos.objects.values_list('indicador', flat=True))
+                if valid in consult_bd:
+                    resultado3 = mssj[4] 
+                else:
+                    resultado3 = mssj[5]
+                '''
+                bank = bancos.objects.filter(indicador__iexact=valid).first()
+
+                if bank:
+                    resultado3 = mssj[4]         
+                else:
+                    resultado3 = mssj[5] '''
+
+            elif first != second:
                 resultado2 = mssj[3]
+                resultado3 = ''
+            else:
+                resultado2 = ''
+                resultado3 = ''
 
+        elif (think.label == "billete_trasero"):
+
+            resultado1 = mssj[8]
+            resultado2 = ''
+            resultado3 = ''
+            
         else:
+            resultado1 = mssj[1] 
 
-            resultado = mssj[1]
 
-
+        if (resultado1 == mssj[0] and resultado2 == mssj[2] and resultado3 == mssj[4] ):
+            resultado4 = mssj[6]
+        elif (resultado1 == mssj[8]):
+            resultado4 = mssj[9]    
+        else:
+            resultado2 = mssj[3]
+            resultado3 = mssj[5]
+            resultado4 = mssj[7]
+            ...
 
         
         img_url = "static/img/output.jpg"
@@ -91,7 +136,7 @@ def procesar_imagen(request):
         # Aquí puedes procesar la imagen con OpenCV
         # Por ejemplo, solo devolvemos el tamaño de la imagen:
         resultado = "Imagen procesada y señalada"
-        return JsonResponse({'resultado': [resultado,resultado1,  resultado2 ], 'img_url': img_url})
+        return JsonResponse({'resultado': [resultado,resultado1,  resultado2, resultado3, resultado4 ], 'img_url': img_url})
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 
