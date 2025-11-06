@@ -36,6 +36,14 @@ def procesar_imagen(request):
         
         think = Tools()
         think.scan(img_path, output_path)
+
+        codes = think.code_read()
+        
+        first = codes[0][1]
+        print(first)
+
+
+
         
         img_url = "static/img/output.jpg"
         

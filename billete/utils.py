@@ -3,6 +3,7 @@ import cv2
 import easyocr
 import numpy as np
 import os
+import json
 from django.conf import settings
 
 # --- Diccionario de diámetros aproximados de monedas de Ecuador (en mm) ---
@@ -86,7 +87,15 @@ class Tools:
 
                 # lectura con ocr 
 
-                self.read_img(img = imgray)
+                codes = self.read_img(img = imgray)
+                
+                # guardare los codigos en un json
+
+                self.code_save(codes)
+
+
+
+                
 
 
 
@@ -120,9 +129,84 @@ class Tools:
         return codes
 
 
+    
+    def lect_charact(self, codes):
+    # 1) Encontrar índice del primer código "largo" (>7 chars sin espacios)
+        first_long_idx = None
+        for i, item in enumerate(codes):
+            clean = item.replace(' ', '')
+            if len(clean) > 7:
+                first_long_idx = i
+                break
+
+        # 2) Si no hay ninguno largo, devolvemos lista vacía (o lo que prefieras)
+        if first_long_idx is None:
+            print("No se detectó ningún código de más de 7 caracteres. Nada que hacer.")
+            return []
+
+        # 3) Tomamos desde ese índice hasta el final (conservar formato original)
+        serial_codes = codes[first_long_idx:]
+
+        # 4) Si hay menos de 2 elementos luego del primer largo, devolvemos los encontrados
+        if len(serial_codes) < 2:
+            print("Advertencia: Sólo hay un código (o menos) desde el primer código válido:", serial_codes)
+            # devolver los códigos limpios puede ser más útil:
+            return [s.replace(' ', '') for s in serial_codes]
+
+        # 5) Limpiamos (quitamos espacios) los dos primeros para extraer caracteres
+        first_code_str = serial_codes[0].replace(' ', '')
+        second_code_str = serial_codes[1].replace(' ', '')
+
+        # 6) Seguridad: asegurarnos que los índices existen
+        if len(first_code_str) < 2:
+            print("El primer código válido no tiene al menos 2 caracteres tras limpiar. Devolviendo códigos limpios.")
+            return [first_code_str, second_code_str]
+
+        if len(second_code_str) < 1:
+            print("El segundo código no tiene al menos 1 carácter tras limpiar. Devolviendo códigos limpios.")
+            return [first_code_str, second_code_str]
+
+        # 7) Extraer los caracteres solicitados
+        code_one = first_code_str[1]   # segundo carácter del primer código válido
+        code_second = second_code_str[0]  # primer carácter del segundo código
+
+        new_codes = [code_one, code_second]
+
+        print("Funciona, se hizo la validación de código. new_codes =", new_codes)
+        return new_codes
 
 
 
+
+
+                 
+
+
+
+    def code_save(self, data):
+
+        self.lect_charact(codes = data)
+
+        filename = os.path.join( settings.BASE_DIR, 'billete', 'static',  'codes.json')
+        with open(filename, 'w') as file:
+            json.dump(data, file, indent=4)
+
+
+        print('si almaceno en el json')
+
+
+
+
+    def code_read(self ):
+        filename = os.path.join( settings.BASE_DIR, 'billete', 'static', 'codes.json')
+        try:
+            with open(filename,'r') as file:
+                data = json.load(file)# load:carga datos desde un archivo json
+        except FileNotFoundError:
+            data = []
+        
+        print(data, 'pilas mira esto para ver si funciona')
+        return data
 
 
 
