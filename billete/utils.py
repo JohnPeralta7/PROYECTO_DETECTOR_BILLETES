@@ -55,7 +55,7 @@ class Tools:
 
         # Convertir de nuevo a BGR
         final_img = cv2.cvtColor(merged, cv2.COLOR_LAB2BGR)
-        #final_img.save(filename = output_path)
+        #final_img.save(filename = output_path) esta linea daba error
 
         return final_img
 
