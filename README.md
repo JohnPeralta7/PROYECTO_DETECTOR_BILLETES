@@ -19,9 +19,7 @@ cmd
 
 
 Paso 4: Descargar el Proyecto
-Opción A: Con Git
-open git bash here
-git init .
+Opción A: Con Git tanto para macbook o windows
 git clone 
 https://github.com/JohnPeralta7/PROYECTO_DETECTOR_BILLETES.git       ose el link del repositorio
 
@@ -32,32 +30,69 @@ https://github.com/JohnPeralta7/PROYECTO_DETECTOR_BILLETES.git       ose el link
 luego abrir el proyecto con su editor de código
 o con open git bash here 
 code .
-Paso 5: Crear Entorno Virtual opcional
+# Paso 5: Crear Entorno Virtual
+
+WINDOWS ----
+
 cmd
-# Crear entorno virtual
-python -m venv venv
+* Crear entorno virtual
+python -m virtualenv venv
+
+Si no tienes instalado virtualenv en tu pc, instalalo de esta manera
+
+pip install virtualenv
+
+
+
+MACOS -------------
+
+* Crear entorno virtual
+
+virtualenv venv
+
+Si no tienes instalado virtualenv en tu pc, instalalo de esta manera
+
+pip install virtualenv
+
 
 # Activar entorno virtual
-venv\Scripts\activate
+
+WINDOWS -----------
+
+.\venv\Scripts\activate
+
+
+MACOS ------------------
+
+source venv/bin/activate
+
 
 # Tu prompt debería mostrar (venv) al inicio
-
-Paso 6: Instalar Dependencias
+
+# Paso 6: Instalar Dependencias
+
+WINDOWS -----------------------
+
 cmd
-# Actualizar pip
-python -m pip install --upgrade pip
 
 # Instalar dependencias
-pip install django==5.2.7
-pip install ultralytics
-pip install opencv-python
-pip install numpy
-pip install python-decouple
-pip install psycopg2-binary
 
-# O instalar todas desde requirements.txt
+# desde requirements.txt
 pip install -r requirements.txt
-Paso 8: Ejecutar el Servidor
+
+
+
+SI DESEAS INSTALAR LOS REQUERIMIENTOS EN MACOS
+MACOS -------------------------------
+
+terminal
+
+pip install -r requerimientos.txt
+
+
+
+
+# Paso 8: Ejecutar el Servidor
 cmd
 python manage.py runserver
 Abre tu navegador en: http://127.0.0.1:8000/
